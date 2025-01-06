@@ -1,0 +1,131 @@
+hybrid reachability
+{
+	 state var _f1, _f2, clockD, F, p, v, cost, clock
+
+	setting
+	{
+		adaptive steps {min 1e-6, max 0.1}
+		time 100
+		remainder estimation 1e-1
+		identity precondition 
+		gnuplot octagon clock, _f1
+		fixed orders 3
+		cutoff 1e-18
+		precision 100
+		output autosig
+		max jumps 50
+		print on
+	}
+
+	modes
+	{
+		_DNN1
+		{
+			nonpoly ode
+			{
+				p' = 0
+				clockD' = 0
+				cost' = 0
+				F' = 0
+				v' = 0
+				_f2' = 0
+				_f1' = 0
+				clock' = 1
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		DNN1
+		{
+			nonpoly ode
+			{
+				p' = 0
+				clockD' = 0
+				cost' = 0
+				F' = 0
+				v' = 0
+				_f2' = 0
+				_f1' = 0
+				clock' = 1
+			}
+			inv
+			{
+				clock <= 0
+			}
+		}
+		initD
+		{
+			nonpoly ode
+			{
+				p' = 0.0
+				clockD' = 1.0
+				cost' = 0.0
+				v' = 0.0
+				F' = 0.0
+				_f2' = 0.0
+				_f1' = 0.0
+				clock' = 0.0
+			}
+			inv
+			{
+				clockD <= 0.0
+			}
+		}
+		environmentD
+		{
+			nonpoly ode
+			{
+				p' = v
+				clockD' = 1.0
+				cost' = 0.1 * F * F
+				v' = v + F * 0.0015 - 0.0025 * cos(3.0 * p)
+				F' = 0.0
+				_f2' = 0.0
+				_f1' = 0.0
+				clock' = 0.0
+			}
+			inv
+			{
+				clockD <= 0.1
+			}
+		}
+	}
+	jumps
+	{
+		_DNN1 -> DNN1
+		guard { }
+		reset { clock' := 0 }
+		interval aggregation
+		initD -> _DNN1
+		guard { clockD = 0.0 }
+		reset { clockD' := 0.0 _f2' := v _f1' := p }
+		interval aggregation
+		environmentD -> initD
+		guard { clockD = 0.1 }
+		reset { clockD' := 0.0 }
+		interval aggregation
+		DNN1 -> environmentD
+		guard { clockD = 0.0 }
+		reset { clockD' := 0.0 F' := _f1 }
+		interval aggregation
+	}
+	init
+	{
+		initD
+		{
+			clock in [0, 0]
+			clockD in [0, 0]
+			p in [-0.6, -0.4]
+			v in [0, 0]
+		}
+	}
+}
+unsafe
+{
+	environmentD
+	{
+		F >= 1
+	}
+}

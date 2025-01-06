@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sspaceex version="0.2" math="SpaceEx">
+  <component id="D">
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="clockD" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="_f1" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="_f2" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="F" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="p" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="v" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="cost" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="any" name="clock" />
+    <param type="real" local="false" d1="1" d2="1" dynamics="const" name="power" />
+    <param type="label" local="false" name="choice" />
+    <param type="label" local="false" name="chosen" />
+    <param type="label" local="false" name="reset" />
+    <location x="349.0" y="150.0" width="154.0" height="174.0" id="2" name="initD">
+      <invariant>clockD &lt;= 0</invariant>
+      <flow>clockD'== 1&amp;
+p' == 0&amp;
+v' == 0&amp;
+cost' == 0&amp;
+F' = 0</flow>
+    </location>
+    <location x="801.0" y="453.0" width="264.0" height="168.0" id="3" name="environmentD">
+      <invariant>clockD &lt;= 1</invariant>
+      <flow>clockD' == 1 &amp;
+p' == v &amp;
+v' == F * power - 0.0025 * cos(3 * p) &amp;
+cost' == (0.1*F*F) + (p*p) - (0.9*p) + 0.2025 &amp; 
+F' == 0</flow>
+    </location>
+    <location x="800.0" y="150.0" width="154.0" height="164.0" id="4" name="DNN1">
+      <invariant />
+      <flow>clockD'==1&amp;
+p'==0&amp;
+v'== 0&amp;
+cost'==0&amp;
+F' == 0</flow>
+    </location>
+    <transition source="2" target="4">
+      <label>choice</label>
+      <labelposition x="-71.0" y="-121.0" width="148" height="120" />
+      <guard>clockD==0.0</guard>
+      <assignment>clockD := 0.0&amp;
+_f1 := p&amp;
+_f2 := v</assignment>
+    </transition>
+    <transition source="4" target="3">
+      <label>chosen</label>
+      <labelposition x="0.0" y="-45.0" width="122" height="74" />
+      <guard>clockD==0.0</guard>
+      <assignment>clockD:= 0.0&amp;
+F:= _f1</assignment>
+    </transition>
+    <transition source="3" target="2">
+      <label>reset</label>
+      <labelposition x="-117.0" y="-27.0" width="96.0" height="62.0" />
+      <guard>clockD==1</guard>
+      <assignment>clockD:=0.0</assignment>
+    </transition>
+  </component>
+  <component id="A">
+    <param name="clockD" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="_f1" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="_f2" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="F" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="p" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="v" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="cost" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="clock" type="real" local="false" d1="1" d2="1" dynamics="any" controlled="true" />
+    <param name="power" type="real" local="false" d1="1" d2="1" dynamics="const" controlled="true" />
+    <param name="choice" type="label" local="false" />
+    <param name="chosen" type="label" local="false" />
+    <param name="reset" type="label" local="false" />
+    <bind component="D" as="D_1" x="605.0" y="362.0" width="254.0" height="194.0">
+      <map key="clockD">clockD</map>
+      <map key="_f1">_f1</map>
+      <map key="_f2">_f2</map>
+      <map key="F">F</map>
+      <map key="p">p</map>
+      <map key="v">v</map>
+      <map key="cost">cost</map>
+      <map key="clock">clock</map>
+      <map key="power">0.0015</map>
+      <map key="choice">choice</map>
+      <map key="chosen">chosen</map>
+      <map key="reset">reset</map>
+    </bind>
+  </component>
+</sspaceex>
+
